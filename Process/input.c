@@ -13,12 +13,15 @@ void setInputStream(FILE* stream) {
   	file = stream;
 }
 
-void Encode() {
-
+void StreamCheck() {
     if (file == NULL) {
         perror("No file specified\n");
         exit(EXIT_FAILURE);
     }
+}
+
+void Encode() {
+    StreamCheck();
 
     int weight[257] = { 0 };
     Paragraph paragraph;
@@ -40,11 +43,10 @@ void Encode() {
                 weight[(unsigned char)paragraph.text[p]]++;
             }
             int point = 0;
-            CharWeight* ChWeight = malloc((point + 1) * sizeof(CharWeight));
+            CharWeight* ChWeight = malloc((freq + 1) * sizeof(CharWeight));
 
             for (int ch = 0; ch < 257; ch ++) {
                 if (weight[ch] != 0) {
-                    ChWeight[point].code = NULL;
                     ChWeight[point].character = (char)ch;
                     ChWeight[point ++].weight = weight[ch];
                 }
@@ -63,3 +65,39 @@ void Encode() {
     fclose(file);
 }
 
+KeyValue* key_value;
+int text_size = 0;
+char text[TEXT_SIZE];
+
+void Decode() {
+    StreamCheck();
+
+    unsigned int char_freq = 0;
+    fread(&char_freq, sizeof(char), 1, file);
+    if (char_freq < 1) {
+        perror("Error: Wrong format\n");
+        exit(EXIT_FAILURE);
+    }
+    key_value = (KeyValue*)malloc((char_freq + 1) * sizeof(KeyValue));
+    for (size_t i = 0; i < char_freq; i ++) {
+        fread(&key_value[i].key, sizeof(BYTE), 1, file);
+        fread(&key_value[i].value, sizeof(BYTE), 1, file);
+    }
+    BYTE code;
+    while (fread(&code, sizeof(BYTE), 1, file)) {
+        for (size_t p = 0; p < char_freq; p ++) {
+            if (code == key_value[p].value) {
+                if (text_size >= TEXT_SIZE) {
+                    perror("Error: text array overflow\n");
+                    exit(EXIT_FAILURE);
+                }
+                text[text_size++] = (char)key_value[p].key;
+                break;
+            }
+        }
+    }
+    text[text_size] = '\0';
+    //又要结束了
+    free(key_value);
+    fclose(file);
+}

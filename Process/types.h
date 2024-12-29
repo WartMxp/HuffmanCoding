@@ -1,13 +1,16 @@
 #pragma once
 
+#include <bemapiset.h>
+
 #define TEXT_SIZE 4096
 #define BUFFER_SIZE 2048
 #define CODE_SIZE 2048
+#define VARIABLE_SIZE 256
 
-extern char code[CODE_SIZE];
-extern int pointer;
+extern unsigned char code[CODE_SIZE];
+extern int code_size;
 
-typedef char Datatype;
+typedef unsigned char Datatype;
 typedef struct HTNode { //霍夫曼树节点
     Datatype character; //字符
     int weight; //权
@@ -25,6 +28,13 @@ typedef struct P {
 typedef struct CharFreq {
     char character;
     int weight;
-    char* code;
+    unsigned int code;
 } CharWeight;
+typedef struct KValue {
+    BYTE key;
+    BYTE value;
+} KeyValue;
 
+extern KeyValue* key_value;
+extern char text[TEXT_SIZE];
+extern int text_size;

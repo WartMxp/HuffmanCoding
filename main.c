@@ -23,9 +23,9 @@ int main(const int argc, char* argv[]) {
     if (args.compress) { //已经写完的编码
         Encode();
         CompressPrint();
-    } else if (args.decompress) { //假装会写的解码
-        fputs("少女祈祷中...\n", stdout);
-        exit(EXIT_SUCCESS);
+    } else if (args.decompress) { //应该会写的解码
+        Decode();
+        DecompressPrint();
     }
     if (args.input != stdin) {
         fclose(args.input);
@@ -57,7 +57,7 @@ CommandLineArgs parseCommandArgs(int argc, char* argv[]) {
 
                 }
                 if (args.output == NULL) {
-                  perror("Error opening output file");
+                  perror("Error: error opening output file.\n");
                   exit(EXIT_FAILURE);
                 }
                 i++;
@@ -71,7 +71,7 @@ CommandLineArgs parseCommandArgs(int argc, char* argv[]) {
                         args.input = fopen(argv[i + 1], "rb");
                     }
                     if (args.input == NULL) {
-                        perror("Error opening input file");
+                        perror("Error: error opening input file.\n");
                         exit(EXIT_FAILURE);
                     }
                     i++;
@@ -79,19 +79,26 @@ CommandLineArgs parseCommandArgs(int argc, char* argv[]) {
                     fputs("Error: --input option requires a file path.\n", stderr);
                     exit(EXIT_FAILURE);
                 }
-            } else if (strcmp(argv[i], "--compress") == 0 ||
-                strcmp(argv[i], "-c") == 0) {
+            } else if (strcmp(argv[i], "--compress") == 0 || strcmp(argv[i], "-c") == 0) {
                 if (compressSeen) {
-                  fputs("Error: --compress option requires a file path.\n", stderr);
+                  fputs("Error: --compress option has been entered multiple times.\n", stderr);
+                  exit(EXIT_FAILURE);
+                }
+                if(decompressSeen) {
+                  fputs("Error: --compress and --decompress options cannot be used together.\n", stderr);
                   exit(EXIT_FAILURE);
                 }
                 compressSeen = 1;
             } else if (strcmp(argv[i], "--decompress") == 0 ||
                 strcmp(argv[i], "-dc") == 0) {
                 if (decompressSeen) {
-                  fputs("Error: --decompress option requires a file path.\n", stderr);
+                  fputs("Error: --decompress option has been entered multiple times.\n", stderr);
                   exit(EXIT_FAILURE);
                 }
+                if(compressSeen) {
+                    fputs("Error: --compress and --decompress options cannot be used together.\n", stderr);
+                    exit(EXIT_FAILURE);
+                  }
                 args.decompress = 1;
                 args.compress = 0;
                 decompressSeen = 1;
@@ -126,5 +133,5 @@ CommandLineArgs parseCommandArgs(int argc, char* argv[]) {
             exit(EXIT_FAILURE);
         }
 
-      return args;
+    return args;
 }

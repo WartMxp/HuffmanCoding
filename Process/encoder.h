@@ -1,5 +1,6 @@
 #pragma once
 #include "Types.h"
+#include "../huffman.h"
 
 void Select(HuffmanTree* HT, int end, int* index1, int* index2);
 HuffmanTree* CreateHuffmanTree(CharWeight* ChWeight, int n);
